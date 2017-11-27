@@ -6,28 +6,21 @@ import ast
 import threading
 import time
 from tqdm import tqdm
-# from sh import cat
+from colorama import init
+from sh import sh, rm, mv
+
+# init()
 
 class pyget:
-
-    # targetURL = 'http://audio.turntablelab.com/realfiles/snoop/snoopdogg-stepyogameup.mp3'
-    targetURL = 'http://ipv4.download.thinkbroadband.com/100MB.zip'
-    # targetURL = 'http://ipv4.download.thinkbroadband.com/512MB.zip'
-    # targetURL = 'http://dl.dlfile.pro/2/Logan.2017.1080p.6CH.mkv'
-    # targetURL = 'http://fs.evonetbd.com/Media/Movies/English%20Movies/2017/Guardians%20of%20the%20Galaxy%20Vol.2%20(2017)%20/Guardians.Of.The.Galaxy.Vol..2.2017.1080p.BluRay.x264.mp4'
-    # fileName = 'downloadedFile.mp3'
+    targetURL = ''
     numWorkers = 20
 
-    def __init__(self):
-        print 'Init'
+    def __init__(self):        
+        self.targetURL = sys.argv[1]
         return
 
     def print_url(self, r, *args, **kwargs):
-        # print r.url
-        # print args
-        # print kwargs
         return
-
 
     def downloadSection(self, partNum='', startPos='', endPos=''):
         total = (int(endPos) - int(startPos))
@@ -52,12 +45,12 @@ class pyget:
         data = requests.head(self.targetURL)
         headerDict = ast.literal_eval(str(data.headers))
         filesize = headerDict['content-length']
-        print 'Filesize is %s' % filesize
+        # print 'Filesize is %s' % filesize
 
         startPos = 0
         partSize = int(filesize) / self.numWorkers
         endPos = partSize
-        print 'End Position is %s' % endPos
+        # print 'End Position is %s' % endPos
 
         threads = []
 
@@ -73,7 +66,9 @@ class pyget:
             # endPos = partSize * (i + 1)
 
         map(lambda t: t.join(), threads)
-
+        sh('./combine.sh')
+        fileName = self.targetURL.split('/')[-1]
+        mv('movie.mkv', fileName)
         return 0
 
 start = time.time()
