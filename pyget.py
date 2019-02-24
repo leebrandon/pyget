@@ -13,9 +13,9 @@ from sh import sh, rm, mv
 
 class pyget:
     targetURL = ''
-    numWorkers = 20
+    numWorkers = 3
 
-    def __init__(self):        
+    def __init__(self):
         self.targetURL = sys.argv[1]
         return
 
@@ -43,8 +43,9 @@ class pyget:
 
     def main(self):
         data = requests.head(self.targetURL)
+        #print(data.headers)
         headerDict = ast.literal_eval(str(data.headers))
-        filesize = headerDict['content-length']
+        filesize = headerDict['Content-Length']
         # print 'Filesize is %s' % filesize
 
         startPos = 0
@@ -66,9 +67,12 @@ class pyget:
             # endPos = partSize * (i + 1)
 
         map(lambda t: t.join(), threads)
+        print('combining all pieces...')
         sh('./combine.sh')
         fileName = self.targetURL.split('/')[-1]
         mv('movie.mkv', fileName)
+        print('Moving file to video storage')
+        mv(fileName, '/media/storage/videos/')
         return 0
 
 start = time.time()
